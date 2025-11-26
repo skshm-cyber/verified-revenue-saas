@@ -9,6 +9,7 @@ import Integrations from "./pages/Integrations";
 import StripeIntegration from "./pages/StripeIntegration";
 import RazorpayIntegration from "./pages/RazorpayIntegration";
 import PaypalIntegration from "./pages/PaypalIntegration";
+import TrustMRRLeaderboard from "./pages/Leaderboard";
 import "./App.css";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Link to="/revenue">Revenue</Link>
           <Link to="/add">Add Revenue</Link>
           <Link to="/integrations">Integrations</Link>
+          <Link to="/leaderboard">Leaderboard</Link>
           <Link to="/signup">Signup</Link>
           {!token ? (
             <Link to="/login">Login</Link>
@@ -55,6 +57,7 @@ function App() {
           <Route path="/integrations/stripe" element={<StripeIntegration />} />
           <Route path="/integrations/razorpay" element={<RazorpayIntegration />} />
           <Route path="/integrations/paypal" element={<PaypalIntegration />} />
+          <Route path="/leaderboard" element={<TrustMRRLeaderboard />} />
         </Routes>
       </div>
     </Router>
