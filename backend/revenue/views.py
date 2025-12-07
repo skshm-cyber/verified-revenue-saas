@@ -611,3 +611,103 @@ def delete_company(request, company_id):
     company.delete()
     return Response({"message": "Company deleted successfully"}, status=status.HTTP_200_OK)
 
+
+# -------------------------------------------------------------------------
+# ADVERTISEMENT SYSTEM
+# -------------------------------------------------------------------------
+from .models import Advertisement
+from .serializers import AdvertisementSerializer
+
+@api_view(["GET"])
+def get_ad_slots(request):
+    """
+    Get status of all ad slots for a specific date (default: today).
+    """
+    date_str = request.query_params.get('date')
+    if date_str:
+        try:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"error": "Invalid date format YYYY-MM-DD"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        target_date = datetime.now().date()
+        
+    slots = [
+        'left_1', 'left_2', 'left_3', 'left_4', 'left_5',
+        'right_1', 'right_2', 'right_3', 'right_4', 'right_5'
+    ]
+    
+    result = {}
+    
+    for slot in slots:
+        # Find active ad for this slot and date
+        active_ad = Advertisement.objects.filter(
+            slot_id=slot,
+            start_date__lte=target_date,
+            end_date__gte=target_date,
+            is_active=True
+        ).first()
+        
+        if active_ad:
+            result[slot] = {
+                "status": "booked",
+                "ad": AdvertisementSerializer(active_ad).data
+            }
+        else:
+            # Check availability for advance booking (optional enhancement)
+            result[slot] = {
+                "status": "available",
+                "price": 5000 # Example price INR
+            }
+            
+    return Response(result)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def book_ad(request):
+    """
+    Book an ad slot.
+    """
+    slot_id = request.data.get('slot_id')
+    start_date_str = request.data.get('start_date')
+    end_date_str = request.data.get('end_date')
+    
+    if not all([slot_id, start_date_str, end_date_str]):
+        return Response({"error": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    if start_date < datetime.now().date() or end_date < start_date:
+        return Response({"error": "Invalid date range"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # Check overlapping
+    overlap = Advertisement.objects.filter(
+        slot_id=slot_id,
+        is_active=True,
+        start_date__lte=end_date,
+        end_date__gte=start_date
+    ).exists()
+    
+    if overlap:
+        return Response({"error": "Slot already booked for these dates"}, status=status.HTTP_409_CONFLICT)
+        
+    # Create Ad
+    # In production, verify payment_id using Razorpay Client here
+    payment_id = request.data.get('payment_id')
+    amount_paid = request.data.get('amount_paid', 0)
+    
+    ad_data = request.data.copy()
+    ad_data['owner'] = request.user.id # This is ignored by serializer save? No, needs context or explicit save
+    
+    # Using serializer to validate other fields
+    serializer = AdvertisementSerializer(data=ad_data)
+    if serializer.is_valid():
+        serializer.save(owner=request.user, payment_id=payment_id, amount_paid=amount_paid)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

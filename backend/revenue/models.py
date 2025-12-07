@@ -65,3 +65,41 @@ class IntegrationKey(models.Model):
 
     def __str__(self):
         return f"{self.company.name} - {self.provider}"
+
+
+class Advertisement(models.Model):
+    SLOT_CHOICES = [
+        ('left_1', 'Left Sidebar 1'),
+        ('left_2', 'Left Sidebar 2'),
+        ('left_3', 'Left Sidebar 3'),
+        ('left_4', 'Left Sidebar 4'),
+        ('left_5', 'Left Sidebar 5'),
+        ('right_1', 'Right Sidebar 1'),
+        ('right_2', 'Right Sidebar 2'),
+        ('right_3', 'Right Sidebar 3'),
+        ('right_4', 'Right Sidebar 4'),
+        ('right_5', 'Right Sidebar 5'),
+    ]
+    
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True) # Optional link to internal company
+    
+    # Ad Content
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=200)
+    target_url = models.URLField(help_text="Where the ad links to")
+    image = models.ImageField(upload_to='ad_images/', blank=True, null=True)
+    
+    # Scheduling & Status
+    slot_id = models.CharField(max_length=20, choices=SLOT_CHOICES)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Payment Info
+    payment_id = models.CharField(max_length=100, blank=True, null=True) # Transaction ID
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    def __str__(self):
+        return f"Ad: {self.title} ({self.slot_id})"

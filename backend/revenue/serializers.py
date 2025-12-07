@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Company
+from .models import Company, Advertisement
 
 class CompanySerializer(serializers.ModelSerializer):
     added_by_username = serializers.CharField(source='added_by.username', read_only=True)
@@ -32,3 +32,9 @@ class CompanySerializer(serializers.ModelSerializer):
             "estimated_mrr"
         ]
         read_only_fields = ['added_by', 'added_by_username']
+
+class AdvertisementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Advertisement
+        fields = '__all__'
+        read_only_fields = ['owner', 'amount_paid', 'payment_id', 'is_active', 'created_at']

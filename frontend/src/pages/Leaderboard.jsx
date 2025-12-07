@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Plus, TrendingUp, Star, Info, Menu, X, Shield, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import './Leaderboard.css';
+import AdSlot from '../components/AdSlot';
+import BookAdModal from '../components/BookAdModal';
 
 export default function TrustMRRLeaderboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,6 +32,62 @@ export default function TrustMRRLeaderboard() {
     isAnonymous: false,
     showInLeaderboard: true
   });
+
+  // Ad System State
+  const [adSlots, setAdSlots] = useState({});
+  const [adBookingState, setAdBookingState] = useState({ isOpen: false, slotId: null });
+
+  useEffect(() => {
+    const fetchAdSlots = async () => {
+      try {
+        const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+        const res = await fetch(`${base}/revenue/ads/slots/`);
+        if (res.ok) {
+          const data = await res.json();
+          setAdSlots(data);
+        }
+      } catch (err) {
+        console.error("Ads fetch error", err);
+      }
+    };
+    fetchAdSlots();
+  }, []);
+
+  const handleBookAdClick = (slotId) => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+    setAdBookingState({ isOpen: true, slotId });
+  };
+
+  const handleAdBookingSubmit = async (formData) => {
+    const token = localStorage.getItem('authToken');
+    const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+
+    const payload = new FormData();
+    Object.keys(formData).forEach(key => {
+      payload.append(key, formData[key]);
+    });
+
+    const res = await fetch(`${base}/revenue/ads/book/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: payload
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || Array.isArray(err) ? err[0] : "Booking failed");
+    }
+
+    showMessage('success', 'Ad booked successfully! It is now live.');
+    // Refresh ads
+    const slotsRes = await fetch(`${base}/revenue/ads/slots/`);
+    if (slotsRes.ok) setAdSlots(await slotsRes.json());
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -393,26 +451,17 @@ export default function TrustMRRLeaderboard() {
       <div className="main-content">
         {/* Left Sidebar */}
         <div className="side-column">
-          <div className="promo-card card-blue">
-            <Shield size={32} color="#4f46e5" />
-            <h3>FounderStack</h3>
-            <p>Get instant lifetime access to 5 powerful tools...</p>
-          </div>
-          <div className="promo-card card-blue">
-            <h3>Grauberg</h3>
-            <p>The design studio for scaling startups.</p>
-          </div>
-          <div className="promo-card card-green">
-            <h3>HypeProxies</h3>
-            <p>Proxy infrastructure built for automating...</p>
-          </div>
-          <div className="promo-card card-purple">
-            <h3>Inbound</h3>
-            <p>Send, receive and reply to emails on a single platform.</p>
-          </div>
-          <div className="promo-card card-purple">
-            <h3>Requesty</h3>
-            <p>Your central AI gateway to support every AI request.</p>
+          <div className="side-column">
+            {['left_1', 'left_2', 'left_3', 'left_4', 'left_5'].map(slotId => (
+              <AdSlot
+                key={slotId}
+                slotId={slotId}
+                status={adSlots[slotId]?.status || 'available'}
+                adData={adSlots[slotId]?.ad}
+                price={adSlots[slotId]?.price}
+                onBookClick={handleBookAdClick}
+              />
+            ))}
           </div>
         </div>
 
@@ -492,25 +541,17 @@ export default function TrustMRRLeaderboard() {
 
         {/* Right Sidebar */}
         <div className="side-column">
-          <div className="promo-card card-blue">
-            <h3>Chargeback.io</h3>
-            <p>Prevent chargebacks on autopilot</p>
-          </div>
-          <div className="promo-card card-dark">
-            <h3>Rewardful</h3>
-            <p>Launch and scale your affiliate program...</p>
-          </div>
-          <div className="promo-card card-dark">
-            <h3>WaitForIt</h3>
-            <p>Build a waitlist for your idea in 3 minutes</p>
-          </div>
-          <div className="promo-card card-green">
-            <h3>Fameswap</h3>
-            <p>Buy established social media accounts</p>
-          </div>
-          <div className="promo-card card-blue">
-            <h3>Okara</h3>
-            <p>Chat privately with 30+ AI models in 1 subscription</p>
+          <div className="side-column">
+            {['right_1', 'right_2', 'right_3', 'right_4', 'right_5'].map(slotId => (
+              <AdSlot
+                key={slotId}
+                slotId={slotId}
+                status={adSlots[slotId]?.status || 'available'}
+                adData={adSlots[slotId]?.ad}
+                price={adSlots[slotId]?.price}
+                onBookClick={handleBookAdClick}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -900,6 +941,14 @@ export default function TrustMRRLeaderboard() {
           </div>
         </div>
       )}
+
+      {/* Ad Booking Modal */}
+      <BookAdModal
+        isOpen={adBookingState.isOpen}
+        onClose={() => setAdBookingState({ isOpen: false, slotId: null })}
+        slotId={adBookingState.slotId}
+        onBook={handleAdBookingSubmit}
+      />
 
       {/* Footer */}
       <footer style={{

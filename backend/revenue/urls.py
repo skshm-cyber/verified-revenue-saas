@@ -14,4 +14,8 @@ urlpatterns = [
     path("integrations/stripe/", views.stripe_integration, name="stripe_integration"),
     path("integrations/razorpay/", views.razorpay_integration, name="razorpay_integration"),
     path("integrations/paypal/", views.paypal_integration, name="paypal_integration"),
+    
+    # Ad endpoints
+    path("ads/slots/", views.get_ad_slots, name="get_ad_slots"),
+    path("ads/book/", views.book_ad, name="book_ad"),
 ]
