@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Eye, Calendar, TrendingUp, DollarSign, XCircle, Clock, CheckCircle } from 'lucide-react';
-import './MyAds.css';
 
 export default function MyAds() {
     const [adsData, setAdsData] = useState({

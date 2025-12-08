@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, Upload, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Upload, Eye, Calendar as CalendarIcon } from 'lucide-react';
 
 export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
     const [formData, setFormData] = useState({
@@ -7,15 +7,41 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
         description: '',
         target_url: '',
         duration: 1, // weeks
-        image: null
+        image: null,
+        customStartDate: null // For future booking
     });
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPreview, setShowPreview] = useState(false);
+    const [nextAvailableDate, setNextAvailableDate] = useState(null);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const PRICE_PER_WEEK = 5000;
     const totalPrice = formData.duration * PRICE_PER_WEEK;
+
+    // Fetch next available date for this slot
+    useEffect(() => {
+        if (isOpen && slotId) {
+            fetchNextAvailableDate();
+        }
+    }, [isOpen, slotId]);
+
+    const fetchNextAvailableDate = async () => {
+        try {
+            const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+            const res = await fetch(`${base}/revenue/ads/calendar/`);
+            if (res.ok) {
+                const calendar = await res.json();
+                const slotInfo = calendar[slotId];
+                if (slotInfo && slotInfo.next_available) {
+                    setNextAvailableDate(slotInfo.next_available);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to fetch availability:', err);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -41,8 +67,9 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
         setError('');
 
         try {
-            const startDate = new Date();
-            const endDate = new Date();
+            // Use custom start date if set, otherwise use today
+            const startDate = formData.customStartDate ? new Date(formData.customStartDate) : new Date();
+            const endDate = new Date(startDate);
             endDate.setDate(endDate.getDate() + (formData.duration * 7));
 
             const paymentId = "pay_" + Math.random().toString(36).substring(7);
@@ -182,6 +209,80 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
                             >
                                 <Eye size={14} /> Preview Banner
                             </button>
+                        )}
+                    </div>
+
+                    {/* Start Date Selection */}
+                    <div style={{ marginBottom: '20px', padding: '16px', background: '#0a0a0a', borderRadius: '8px', border: '1px solid #333' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <label style={{ color: '#ccc', fontSize: '0.9rem', fontWeight: '600' }}>
+                                Start Date
+                            </label>
+                            {nextAvailableDate && (
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, customStartDate: nextAvailableDate })}
+                                    style={{
+                                        padding: '4px 10px',
+                                        background: '#4f46e5',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Use Next Available ({new Date(nextAvailableDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })})
+                                </button>
+                            )}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, customStartDate: null })}
+                                style={{
+                                    padding: '12px',
+                                    background: !formData.customStartDate ? '#4f46e5' : '#1a1a1a',
+                                    border: `1px solid ${!formData.customStartDate ? '#4f46e5' : '#333'}`,
+                                    borderRadius: '6px',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85rem'
+                                }}
+                            >
+                                <div style={{ fontWeight: '600', marginBottom: '4px' }}>Start Today</div>
+                                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                                    {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </div>
+                            </button>
+
+                            <div>
+                                <input
+                                    type="date"
+                                    value={formData.customStartDate || ''}
+                                    onChange={(e) => setFormData({ ...formData, customStartDate: e.target.value })}
+                                    min={new Date().toISOString().split('T')[0]}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        background: formData.customStartDate ? '#4f46e5' : '#1a1a1a',
+                                        border: `1px solid ${formData.customStartDate ? '#4f46e5' : '#333'}`,
+                                        color: '#fff',
+                                        borderRadius: '6px',
+                                        fontSize: '0.85rem'
+                                    }}
+                                />
+                                <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '4px' }}>
+                                    {formData.customStartDate ? 'Custom date selected' : 'Select future date'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {nextAvailableDate && (
+                            <div style={{ marginTop: '12px', padding: '10px', background: '#111', borderRadius: '6px', fontSize: '0.8rem', color: '#10b981' }}>
+                                ✓ Next available: {new Date(nextAvailableDate).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </div>
                         )}
                     </div>
 
