@@ -152,7 +152,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+# Allow all origins to avoid CORS issues if production settings aren't loaded correctly
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+
 
 # Email Configuration for Ad Notifications
 # For development, use console backend (prints to terminal)
