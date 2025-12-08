@@ -391,9 +391,13 @@ export default function TrustMRRLeaderboard() {
 
       <header className="header">
         <div className="header-top">
-          <div className="brand">
-            <Star className="brand-icon" size={24} fill="#4f46e5" />
-            <span>TrustMRR</span>
+          <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img
+              src="/truerr-logo.png"
+              alt="TrueRR Logo"
+              style={{ width: '32px', height: '32px', borderRadius: '6px' }}
+            />
+            <span style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '-0.5px' }}>TrueRR</span>
           </div>
           {isLoggedIn ? (
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -721,7 +725,7 @@ export default function TrustMRRLeaderboard() {
             <div style={{ padding: '20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
               <div>
                 <h2 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>Add your startup</h2>
-                <p style={{ margin: 0, color: '#888', fontSize: '0.85rem' }}>Get a dedicated page on TrustMRR to showcase your startup's verified revenue.</p>
+                <p style={{ margin: 0, color: '#888', fontSize: '0.85rem' }}>Get a dedicated page on TrueRR to showcase your startup's verified revenue.</p>
               </div>
               <button onClick={() => setShowAddStartupModal(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>
                 <X size={20} />
@@ -1068,7 +1072,7 @@ export default function TrustMRRLeaderboard() {
 
           {/* About */}
           <div>
-            <h3 style={{ fontSize: '1rem', marginBottom: '20px', color: '#fff' }}>About TrustMRR</h3>
+            <h3 style={{ fontSize: '1rem', marginBottom: '20px', color: '#fff' }}>About TrueRR</h3>
             <p style={{ color: '#888', fontSize: '0.9rem', lineHeight: '1.6', margin: 0 }}>
               The database of verified startup revenues. Track real revenue data from payment processors like Stripe, Razorpay, and PayPal.
             </p>
@@ -1086,7 +1090,7 @@ export default function TrustMRRLeaderboard() {
           color: '#666',
           fontSize: '0.85rem'
         }}>
-          <p style={{ margin: 0 }}>© 2025 TrustMRR. All rights reserved.</p>
+          <p style={{ margin: 0 }}>© 2025 TrueRR. All rights reserved.</p>
         </div>
       </footer>
     </div>

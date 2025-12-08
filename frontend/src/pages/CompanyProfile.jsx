@@ -271,7 +271,7 @@ export default function CompanyProfile() {
             {/* Header with breadcrumb */}
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '30px', color: '#888', fontSize: '0.9rem' }}>
-                    <Link to="/" style={{ color: '#888', textDecoration: 'none' }}>★ TrustMRR</Link>
+                    <Link to="/" style={{ color: '#888', textDecoration: 'none' }}>★ TrueRR</Link>
                     <span>›</span>
                     <Link to="/" style={{ color: '#888', textDecoration: 'none' }}>Startup</Link>
                     <span>›</span>
@@ -554,7 +554,7 @@ export default function CompanyProfile() {
                 {/* Footer */}
                 <div style={{ textAlign: 'center', paddingTop: '40px', borderTop: '1px solid #222' }}>
                     <div style={{ marginBottom: '20px' }}>
-                        <span style={{ fontSize: '1.2rem' }}>★ TrustMRR</span>
+                        <span style={{ fontSize: '1.2rem' }}>★ TrueRR</span>
                     </div>
                     <div style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '24px' }}>
                         The database of verified startup revenues
