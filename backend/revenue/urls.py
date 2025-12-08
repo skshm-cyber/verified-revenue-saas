@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, ad_views
 
 urlpatterns = [
     path("companies/", views.list_companies, name="list_companies"),
@@ -18,4 +18,9 @@ urlpatterns = [
     # Ad endpoints
     path("ads/slots/", views.get_ad_slots, name="get_ad_slots"),
     path("ads/book/", views.book_ad, name="book_ad"),
+    path("ads/my/", ad_views.my_ads, name="my_ads"),
+    path("ads/calendar/", ad_views.ad_availability_calendar, name="ad_calendar"),
+    path("ads/<int:ad_id>/click/", ad_views.track_ad_click, name="track_ad_click"),
+    path("ads/<int:ad_id>/cancel/", ad_views.cancel_ad, name="cancel_ad"),
+    path("ads/impressions/", ad_views.track_ad_impression, name="track_ad_impression"),
 ]

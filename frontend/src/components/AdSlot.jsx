@@ -4,6 +4,19 @@ import { ExternalLink, Calendar, Plus } from 'lucide-react';
 export default function AdSlot({ slotId, status, adData, onBookClick, price }) {
     const isBooked = status === 'booked';
 
+    const handleAdClick = async (e) => {
+        if (!isBooked || !adData) return;
+
+        // Track click
+        const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+        try {
+            await fetch(`${base}/revenue/ads/${adData.id}/click/`, { method: 'POST' });
+            console.log('Ad click tracked');
+        } catch (err) {
+            console.error('Failed to track click:', err);
+        }
+    };
+
     if (isBooked && adData) {
         return (
             <div style={{ marginBottom: '20px' }}>
@@ -11,6 +24,7 @@ export default function AdSlot({ slotId, status, adData, onBookClick, price }) {
                     href={adData.target_url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={handleAdClick}
                     className="ad-slot booked"
                     style={{
                         display: 'block',

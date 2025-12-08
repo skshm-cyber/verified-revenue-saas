@@ -101,5 +101,35 @@ class Advertisement(models.Model):
     payment_id = models.CharField(max_length=100, blank=True, null=True) # Transaction ID
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
+    # Analytics & Performance
+    impressions = models.IntegerField(default=0)  # How many times ad was shown
+    clicks = models.IntegerField(default=0)  # How many times ad was clicked
+    
+    # Notifications
+    confirmation_email_sent = models.BooleanField(default=False)
+    live_notification_sent = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"Ad: {self.title} ({self.slot_id})"
+    
+    @property
+    def ctr(self):
+        """Click-through rate"""
+        if self.impressions == 0:
+            return 0
+        return (self.clicks / self.impressions) * 100
+    
+    @property
+    def is_live(self):
+        """Check if ad is currently live"""
+        from datetime import date
+        today = date.today()
+        return self.is_active and self.start_date <= today <= self.end_date
+    
+    @property
+    def days_remaining(self):
+        """Days until ad expires"""
+        from datetime import date
+        if not self.is_live:
+            return 0
+        return (self.end_date - date.today()).days

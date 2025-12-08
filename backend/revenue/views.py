@@ -668,18 +668,27 @@ def book_ad(request):
     """
     Book an ad slot.
     """
+    print("=== AD BOOKING DEBUG ===")
+    print("request.data:", request.data)
+    print("request.FILES:", request.FILES)
+    
     slot_id = request.data.get('slot_id')
     start_date_str = request.data.get('start_date')
     end_date_str = request.data.get('end_date')
     
+    print(f"slot_id: {slot_id}, start_date: {start_date_str}, end_date: {end_date_str}")
+    
     if not all([slot_id, start_date_str, end_date_str]):
-        return Response({"error": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST)
+        error_msg = f"Missing fields - slot_id: {slot_id}, start_date: {start_date_str}, end_date: {end_date_str}"
+        print("ERROR:", error_msg)
+        return Response({"error": error_msg}, status=status.HTTP_400_BAD_REQUEST)
         
     try:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-    except ValueError:
-        return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        print("Date parsing error:", e)
+        return Response({"error": f"Invalid date format: {e}"}, status=status.HTTP_400_BAD_REQUEST)
         
     if start_date < datetime.now().date() or end_date < start_date:
         return Response({"error": "Invalid date range"}, status=status.HTTP_400_BAD_REQUEST)
@@ -696,18 +705,58 @@ def book_ad(request):
         return Response({"error": "Slot already booked for these dates"}, status=status.HTTP_409_CONFLICT)
         
     # Create Ad
-    # In production, verify payment_id using Razorpay Client here
     payment_id = request.data.get('payment_id')
     amount_paid = request.data.get('amount_paid', 0)
     
-    ad_data = request.data.copy()
-    ad_data['owner'] = request.user.id # This is ignored by serializer save? No, needs context or explicit save
+    # Build ad data manually
+    ad_data = {
+        'title': request.data.get('title'),
+        'description': request.data.get('description', ''),
+        'target_url': request.data.get('target_url'),
+        'slot_id': slot_id,
+        'start_date': start_date,
+        'end_date': end_date,
+        'is_active': True,
+    }
     
-    # Using serializer to validate other fields
-    serializer = AdvertisementSerializer(data=ad_data)
-    if serializer.is_valid():
-        serializer.save(owner=request.user, payment_id=payment_id, amount_paid=amount_paid)
+    print("ad_data to create:", ad_data)
+    
+    # Create advertisement directly
+    try:
+        ad = Advertisement.objects.create(
+            owner=request.user,
+            title=ad_data['title'],
+            description=ad_data['description'],
+            target_url=ad_data['target_url'],
+            slot_id=ad_data['slot_id'],
+            start_date=ad_data['start_date'],
+            end_date=ad_data['end_date'],
+            payment_id=payment_id,
+            amount_paid=amount_paid,
+            is_active=True
+        )
+        
+        # Handle image if present
+        if 'image' in request.FILES:
+            ad.image = request.FILES['image']
+            ad.save()
+        
+        # Send confirmation email
+        try:
+            from .notifications import send_ad_confirmation_email
+            send_ad_confirmation_email(ad)
+            ad.confirmation_email_sent = True
+            ad.save(update_fields=['confirmation_email_sent'])
+        except Exception as email_error:
+            print(f"Email notification failed: {email_error}")
+            # Don't fail the booking if email fails
+        
+        print("Ad created successfully:", ad.id)
+        serializer = AdvertisementSerializer(ad)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print("Ad creation error:", e)
+        import traceback
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

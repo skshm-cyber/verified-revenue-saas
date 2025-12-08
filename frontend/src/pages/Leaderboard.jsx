@@ -67,7 +67,9 @@ export default function TrustMRRLeaderboard() {
 
     const payload = new FormData();
     Object.keys(formData).forEach(key => {
-      payload.append(key, formData[key]);
+      if (formData[key] !== null) {
+        payload.append(key, formData[key]);
+      }
     });
 
     const res = await fetch(`${base}/revenue/ads/book/`, {
