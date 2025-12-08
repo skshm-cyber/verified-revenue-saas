@@ -5,7 +5,7 @@ echo "🚀 Preparing for deployment..."
 # Generate secret key
 echo ""
 echo "📝 Generate a SECRET_KEY for Railway:"
-python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+backend/venv/bin/python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 
 echo ""
 echo "✅ Deployment files ready!"

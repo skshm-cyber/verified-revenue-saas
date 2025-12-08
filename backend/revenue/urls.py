@@ -17,6 +17,7 @@ urlpatterns = [
     
     # Ad endpoints
     path("ads/slots/", views.get_ad_slots, name="get_ad_slots"),
+    path("ads/price/", views.get_price_estimate, name="get_price_estimate"),
     path("ads/book/", views.book_ad, name="book_ad"),
     path("ads/my/", ad_views.my_ads, name="my_ads"),
     path("ads/calendar/", ad_views.ad_availability_calendar, name="ad_calendar"),

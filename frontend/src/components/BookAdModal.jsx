@@ -13,14 +13,39 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
     const [imagePreview, setImagePreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [showPreview, setShowPreview] = useState(false);
     const [nextAvailableDate, setNextAvailableDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [priceInfo, setPriceInfo] = useState({ total_price: 5000, final_weekly_rate: 5000, applied_discounts: {} });
 
-    const PRICE_PER_WEEK = 5000;
-    const totalPrice = formData.duration * PRICE_PER_WEEK;
+    const PRICE_PER_WEEK = 5000; // Fallback
 
-    // Fetch next available date for this slot
+    useEffect(() => {
+        // Fetch dynamic price
+        const fetchPrice = async () => {
+            const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+            try {
+                const res = await fetch(`${base}/revenue/ads/price/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        slot_id: slotId,
+                        duration: formData.duration,
+                        start_date: formData.customStartDate || new Date().toISOString().split('T')[0]
+                    })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setPriceInfo(data);
+                }
+            } catch (err) { console.error(err); }
+        };
+
+        if (isOpen) fetchPrice();
+    }, [formData.duration, formData.customStartDate, slotId, isOpen]);
+
+    const totalPrice = priceInfo.total_price;
+
+    if (!isOpen) return null;
     useEffect(() => {
         if (isOpen && slotId) {
             fetchNextAvailableDate();
@@ -317,21 +342,28 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
                                         color: '#fff',
                                         cursor: 'pointer',
                                         textAlign: 'center',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s',
+                                        position: 'relative'
                                     }}
                                 >
+                                    {weeks >= 4 && (
+                                        <div style={{ position: 'absolute', top: '-8px', right: '-4px', background: '#10b981', color: '#000', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold' }}>
+                                            SAVE {weeks === 4 ? '10%' : '20%'}
+                                        </div>
+                                    )}
                                     <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{weeks}</div>
                                     <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '2px' }}>
                                         {weeks === 1 ? 'Week' : 'Weeks'}
                                     </div>
                                     <div style={{ fontSize: '0.85rem', color: '#10b981', marginTop: '6px', fontWeight: '600' }}>
-                                        ₹{(weeks * PRICE_PER_WEEK).toLocaleString()}
+                                        {formData.duration === weeks ? `₹${priceInfo.total_price.toLocaleString()}` : ''}
                                     </div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
+                    {/* Price Summary */}
                     <div style={{
                         padding: '20px',
                         background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)',
@@ -344,13 +376,28 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
                             <span style={{ color: '#fff', fontWeight: '600' }}>{formData.duration} {formData.duration === 1 ? 'Week' : 'Weeks'}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <span style={{ color: '#aaa' }}>Price per week:</span>
-                            <span style={{ color: '#fff' }}>₹{PRICE_PER_WEEK.toLocaleString()}</span>
+                            <span style={{ color: '#aaa' }}>Weekly Rate:</span>
+                            <span style={{ color: '#fff' }}>₹{priceInfo.final_weekly_rate.toLocaleString()}</span>
                         </div>
+
+                        {/* Show applied discounts */}
+                        {priceInfo.applied_discounts?.duration && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.85rem', color: '#10b981' }}>
+                                <span>Duration Discount:</span>
+                                <span>{priceInfo.applied_discounts.duration}</span>
+                            </div>
+                        )}
+                        {priceInfo.applied_discounts?.demand && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '0.85rem', color: '#f59e0b' }}>
+                                <span>High Demand Surcharge:</span>
+                                <span>{priceInfo.applied_discounts.demand}</span>
+                            </div>
+                        )}
+
                         <div style={{ height: '1px', background: '#333', margin: '12px 0' }}></div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600' }}>Total:</span>
-                            <span style={{ color: '#10b981', fontSize: '1.5rem', fontWeight: 'bold' }}>₹{totalPrice.toLocaleString()}</span>
+                            <span style={{ color: '#10b981', fontSize: '1.5rem', fontWeight: 'bold' }}>₹{priceInfo.total_price.toLocaleString()}</span>
                         </div>
                     </div>
 

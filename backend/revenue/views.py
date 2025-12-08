@@ -663,8 +663,23 @@ def get_ad_slots(request):
     return Response(result)
 
 @api_view(["POST"])
+def get_price_estimate(request):
+    """
+    Get dynamic price estimate based on slot, duration and date
+    """
+    slot_id = request.data.get('slot_id')
+    weeks = int(request.data.get('duration', 1))
+    start_date = request.data.get('start_date')
+    
+    from .pricing import calculate_dynamic_price
+    price_info = calculate_dynamic_price(slot_id, weeks, start_date)
+    
+    return Response(price_info)
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def book_ad(request):
+
     """
     Book an ad slot.
     """
