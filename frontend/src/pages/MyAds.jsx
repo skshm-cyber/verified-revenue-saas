@@ -12,16 +12,18 @@ export default function MyAds() {
     });
     const [loading, setLoading] = useState(true);
 
+    // Dynamic Backend URL for images
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+    const backendUrl = apiBase.replace('/api', '');
+
     useEffect(() => {
         fetchMyAds();
     }, []);
 
     const fetchMyAds = async () => {
         const token = localStorage.getItem('authToken');
-        const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
-
         try {
-            const res = await fetch(`${base}/revenue/ads/my/`, {
+            const res = await fetch(`${apiBase}/revenue/ads/my/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -40,10 +42,8 @@ export default function MyAds() {
         if (!confirm('Are you sure you want to cancel this ad?')) return;
 
         const token = localStorage.getItem('authToken');
-        const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
-
         try {
-            const res = await fetch(`${base}/revenue/ads/${adId}/cancel/`, {
+            const res = await fetch(`${apiBase}/revenue/ads/${adId}/cancel/`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -78,7 +78,7 @@ export default function MyAds() {
                 }}>
                     {ad.image ? (
                         <img
-                            src={ad.image.startsWith('http') ? ad.image : `http://localhost:8000${ad.image}`}
+                            src={ad.image.startsWith('http') ? ad.image : `${backendUrl}${ad.image}`}
                             alt={ad.title}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />

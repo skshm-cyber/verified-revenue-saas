@@ -110,7 +110,8 @@ export default function TrustMRRLeaderboard() {
       return;
     }
     try {
-      const res = await fetch('http://localhost:8000/api/login/', {
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+      const res = await fetch(`${base}/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm)
@@ -135,7 +136,8 @@ export default function TrustMRRLeaderboard() {
       return;
     }
     try {
-      const res = await fetch('http://localhost:8000/api/signup/', {
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+      const res = await fetch(`${base}/signup/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signupForm)
@@ -519,7 +521,7 @@ export default function TrustMRRLeaderboard() {
                     <div className="startup-info">
                       {company.logo ? (
                         <img
-                          src={company.logo.startsWith('http') ? company.logo : `http://localhost:8000${company.logo}`}
+                          src={company.logo.startsWith('http') ? company.logo : `${backendUrl}${company.logo}`}
                           alt={company.name}
                           className="startup-logo"
                           style={{ objectFit: 'cover' }}
@@ -568,17 +570,18 @@ export default function TrustMRRLeaderboard() {
               />
             ))}
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
 
       {/* Browse by Category Section */}
-      <div style={{
+      < div style={{
         maxWidth: '1400px',
         margin: '60px auto 40px auto',
         padding: '0 20px',
         borderTop: '1px solid #222',
         paddingTop: '60px'
-      }}>
+      }
+      }>
         <h2 style={{
           textAlign: 'center',
           fontSize: '2rem',
@@ -651,146 +654,278 @@ export default function TrustMRRLeaderboard() {
             </button>
           ))}
         </div>
-      </div>
+      </div >
 
       {/* Auth Modal */}
-      {showAuthModal && (
-        <div style={{
-          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
-        }}>
-          <div style={{ backgroundColor: '#111', border: '1px solid #333', padding: '30px', borderRadius: '16px', width: '400px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <h2>{authMode === 'login' ? 'Login' : 'Sign Up'}</h2>
-              <button onClick={() => setShowAuthModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X /></button>
-            </div>
-            <input
-              style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#222', border: '1px solid #333', color: '#fff', borderRadius: '4px' }}
-              placeholder="Username"
-              value={authMode === 'login' ? loginForm.username : signupForm.username}
-              onChange={e => authMode === 'login' ? setLoginForm({ ...loginForm, username: e.target.value }) : setSignupForm({ ...signupForm, username: e.target.value })}
-            />
-            {authMode === 'signup' && (
+      {
+        showAuthModal && (
+          <div style={{
+            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
+          }}>
+            <div style={{ backgroundColor: '#111', border: '1px solid #333', padding: '30px', borderRadius: '16px', width: '400px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <h2>{authMode === 'login' ? 'Login' : 'Sign Up'}</h2>
+                <button onClick={() => setShowAuthModal(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X /></button>
+              </div>
               <input
                 style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#222', border: '1px solid #333', color: '#fff', borderRadius: '4px' }}
-                placeholder="Email"
-                value={signupForm.email}
-                onChange={e => setSignupForm({ ...signupForm, email: e.target.value })}
+                placeholder="Username"
+                value={authMode === 'login' ? loginForm.username : signupForm.username}
+                onChange={e => authMode === 'login' ? setLoginForm({ ...loginForm, username: e.target.value }) : setSignupForm({ ...signupForm, username: e.target.value })}
               />
-            )}
-            <input
-              style={{ width: '100%', padding: '10px', marginBottom: '20px', background: '#222', border: '1px solid #333', color: '#fff', borderRadius: '4px' }}
-              placeholder="Password"
-              type="password"
-              value={authMode === 'login' ? loginForm.password : signupForm.password}
-              onChange={e => authMode === 'login' ? setLoginForm({ ...loginForm, password: e.target.value }) : setSignupForm({ ...signupForm, password: e.target.value })}
-            />
-            <button
-              onClick={authMode === 'login' ? handleLogin : handleSignup}
-              style={{ width: '100%', padding: '12px', background: '#fff', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
-            >
-              {authMode === 'login' ? 'Login' : 'Sign Up'}
-            </button>
-            <p style={{ textAlign: 'center', marginTop: '15px', color: '#888', fontSize: '0.9rem' }}>
-              {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
-              <span
-                style={{ color: '#fff', cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+              {authMode === 'signup' && (
+                <input
+                  style={{ width: '100%', padding: '10px', marginBottom: '10px', background: '#222', border: '1px solid #333', color: '#fff', borderRadius: '4px' }}
+                  placeholder="Email"
+                  value={signupForm.email}
+                  onChange={e => setSignupForm({ ...signupForm, email: e.target.value })}
+                />
+              )}
+              <input
+                style={{ width: '100%', padding: '10px', marginBottom: '20px', background: '#222', border: '1px solid #333', color: '#fff', borderRadius: '4px' }}
+                placeholder="Password"
+                type="password"
+                value={authMode === 'login' ? loginForm.password : signupForm.password}
+                onChange={e => authMode === 'login' ? setLoginForm({ ...loginForm, password: e.target.value }) : setSignupForm({ ...signupForm, password: e.target.value })}
+              />
+              <button
+                onClick={authMode === 'login' ? handleLogin : handleSignup}
+                style={{ width: '100%', padding: '12px', background: '#fff', color: '#000', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}
               >
-                {authMode === 'login' ? 'Sign up' : 'Login'}
-              </span>
-            </p>
+                {authMode === 'login' ? 'Login' : 'Sign Up'}
+              </button>
+              <p style={{ textAlign: 'center', marginTop: '15px', color: '#888', fontSize: '0.9rem' }}>
+                {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
+                <span
+                  style={{ color: '#fff', cursor: 'pointer', textDecoration: 'underline' }}
+                  onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                >
+                  {authMode === 'login' ? 'Sign up' : 'Login'}
+                </span>
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Add Startup Modal */}
-      {showAddStartupModal && (
-        <div style={{
-          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
-        }}>
+      {
+        showAddStartupModal && (
           <div style={{
-            backgroundColor: '#111',
-            border: '1px solid #333',
-            borderRadius: '16px',
-            width: '600px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            display: 'flex',
-            flexDirection: 'column'
+            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
           }}>
-            {/* Header */}
-            <div style={{ padding: '20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-              <div>
-                <h2 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>Add your startup</h2>
-                <p style={{ margin: 0, color: '#888', fontSize: '0.85rem' }}>Get a dedicated page on TrueRR to showcase your startup's verified revenue.</p>
-              </div>
-              <button onClick={() => setShowAddStartupModal(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Provider Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid #333', padding: '0 20px' }}>
-              {['stripe', 'razorpay', 'paypal'].map(provider => (
-                <button
-                  key={provider}
-                  onClick={() => setSelectedProvider(provider)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '15px 20px',
-                    color: selectedProvider === provider ? '#fff' : '#888',
-                    cursor: 'pointer',
-                    borderBottom: selectedProvider === provider ? '2px solid #4f46e5' : '2px solid transparent',
-                    textTransform: 'capitalize'
-                  }}
-                >
-                  {provider}
-                </button>
-              ))}
-            </div>
-
-            {/* Form */}
-            <div style={{ padding: '20px' }}>
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Startup Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. My Awesome SaaS"
-                  value={integrationForm.companyName}
-                  onChange={(e) => setIntegrationForm({ ...integrationForm, companyName: e.target.value })}
-                  style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Description</label>
-                <textarea
-                  placeholder="Brief description of your startup"
-                  value={integrationForm.description}
-                  onChange={(e) => setIntegrationForm({ ...integrationForm, description: e.target.value })}
-                  maxLength={500}
-                  rows={3}
-                  style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div style={{
+              backgroundColor: '#111',
+              border: '1px solid #333',
+              borderRadius: '16px',
+              width: '600px',
+              maxWidth: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Header */}
+              <div style={{ padding: '20px', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Website URL</label>
+                  <h2 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>Add your startup</h2>
+                  <p style={{ margin: 0, color: '#888', fontSize: '0.85rem' }}>Get a dedicated page on TrueRR to showcase your startup's verified revenue.</p>
+                </div>
+                <button onClick={() => setShowAddStartupModal(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Provider Tabs */}
+              <div style={{ display: 'flex', borderBottom: '1px solid #333', padding: '0 20px' }}>
+                {['stripe', 'razorpay', 'paypal'].map(provider => (
+                  <button
+                    key={provider}
+                    onClick={() => setSelectedProvider(provider)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '15px 20px',
+                      color: selectedProvider === provider ? '#fff' : '#888',
+                      cursor: 'pointer',
+                      borderBottom: selectedProvider === provider ? '2px solid #4f46e5' : '2px solid transparent',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {provider}
+                  </button>
+                ))}
+              </div>
+
+              {/* Form */}
+              <div style={{ padding: '20px' }}>
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Startup Name</label>
                   <input
-                    type="url"
-                    placeholder="https://"
-                    value={integrationForm.website}
-                    onChange={(e) => setIntegrationForm({ ...integrationForm, website: e.target.value })}
+                    type="text"
+                    placeholder="e.g. My Awesome SaaS"
+                    value={integrationForm.companyName}
+                    onChange={(e) => setIntegrationForm({ ...integrationForm, companyName: e.target.value })}
                     style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
                   />
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Twitter Handle</label>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Description</label>
+                  <textarea
+                    placeholder="Brief description of your startup"
+                    value={integrationForm.description}
+                    onChange={(e) => setIntegrationForm({ ...integrationForm, description: e.target.value })}
+                    maxLength={500}
+                    rows={3}
+                    style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', resize: 'vertical' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Website URL</label>
+                    <input
+                      type="url"
+                      placeholder="https://"
+                      value={integrationForm.website}
+                      onChange={(e) => setIntegrationForm({ ...integrationForm, website: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Twitter Handle</label>
+                    <input
+                      type="text"
+                      placeholder="@username"
+                      value={integrationForm.twitterHandle}
+                      onChange={(e) => setIntegrationForm({ ...integrationForm, twitterHandle: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Logo</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
+                  />
+                  <div style={{ marginTop: '5px', fontSize: '0.75rem', color: '#666', lineHeight: '1.3' }}>
+                    Upload any image - automatically resized to 400×400px and optimized for web
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Category</label>
+                  <select
+                    value={integrationForm.category}
+                    onChange={(e) => setIntegrationForm({ ...integrationForm, category: e.target.value })}
+                    style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
+                  >
+                    <option value="saas">SaaS</option>
+                    <option value="youtuber_gamer">YouTuber - Gamer</option>
+                    <option value="youtuber_content_creator">YouTuber - Content Creator</option>
+                    <option value="youtuber_educational">YouTuber - Educational</option>
+                    <option value="influencer_instagram">Influencer - Instagram</option>
+                    <option value="influencer_facebook">Influencer - Facebook</option>
+                    <option value="influencer_twitter">Influencer - Twitter/X</option>
+                    <option value="indian_startup">Indian Startup</option>
+                    <option value="film_entertainment">Film/Entertainment</option>
+                    <option value="business_india">Business in India</option>
+                    <option value="ecommerce">E-commerce</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="agency">Agency</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIntegrationForm({ ...integrationForm, showInLeaderboard: !integrationForm.showInLeaderboard })}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '1px solid #666',
+                    borderRadius: '4px',
+                    backgroundColor: integrationForm.showInLeaderboard ? '#4f46e5' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {integrationForm.showInLeaderboard && <div style={{ width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '2px' }}></div>}
+                  </div>
+                  <span style={{ color: '#ccc', fontSize: '0.9rem' }}>Show in public leaderboard</span>
+                </div>
+
+                {selectedProvider === 'stripe' && (
+                  <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Stripe API key</label>
+                    <input
+                      type="text"
+                      placeholder="rk_live_..."
+                      value={integrationForm.apiKey}
+                      onChange={(e) => setIntegrationForm({ ...integrationForm, apiKey: e.target.value })}
+                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
+                    />
+                    <p style={{ margin: '5px 0 0 0', fontSize: '0.75rem', color: '#666' }}>Click here to create a read-only API key.</p>
+                  </div>
+                )}
+
+                {selectedProvider === 'razorpay' && (
+                  <>
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Key ID</label>
+                      <input
+                        type="text"
+                        placeholder="rzp_live_..."
+                        value={integrationForm.apiKey}
+                        onChange={(e) => setIntegrationForm({ ...integrationForm, apiKey: e.target.value })}
+                        style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Key Secret</label>
+                      <input
+                        type="password"
+                        placeholder="Secret..."
+                        value={integrationForm.apiSecret}
+                        onChange={(e) => setIntegrationForm({ ...integrationForm, apiSecret: e.target.value })}
+                        style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {selectedProvider === 'paypal' && (
+                  <>
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Client ID</label>
+                      <input
+                        type="text"
+                        placeholder="Client ID..."
+                        value={integrationForm.clientId}
+                        onChange={(e) => setIntegrationForm({ ...integrationForm, clientId: e.target.value })}
+                        style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Secret</label>
+                      <input
+                        type="password"
+                        placeholder="Secret..."
+                        value={integrationForm.apiSecret}
+                        onChange={(e) => setIntegrationForm({ ...integrationForm, apiSecret: e.target.value })}
+                        style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>X handle (optional)</label>
                   <input
                     type="text"
                     placeholder="@username"
@@ -799,163 +934,35 @@ export default function TrustMRRLeaderboard() {
                     style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
                   />
                 </div>
-              </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Logo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
-                />
-                <div style={{ marginTop: '5px', fontSize: '0.75rem', color: '#666', lineHeight: '1.3' }}>
-                  Upload any image - automatically resized to 400×400px and optimized for web
+                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIntegrationForm({ ...integrationForm, isAnonymous: !integrationForm.isAnonymous })}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '1px solid #666',
+                    borderRadius: '4px',
+                    backgroundColor: integrationForm.isAnonymous ? '#4f46e5' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {integrationForm.isAnonymous && <div style={{ width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '2px' }}></div>}
+                  </div>
+                  <span style={{ color: '#ccc', fontSize: '0.9rem' }}>Anonymous mode</span>
+                  <Info size={16} color="#666" />
                 </div>
-              </div>
 
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Category</label>
-                <select
-                  value={integrationForm.category}
-                  onChange={(e) => setIntegrationForm({ ...integrationForm, category: e.target.value })}
-                  style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
+                <button
+                  onClick={handleAddStartupSubmit}
+                  style={{ width: '100%', padding: '12px', background: '#fff', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
                 >
-                  <option value="saas">SaaS</option>
-                  <option value="youtuber_gamer">YouTuber - Gamer</option>
-                  <option value="youtuber_content_creator">YouTuber - Content Creator</option>
-                  <option value="youtuber_educational">YouTuber - Educational</option>
-                  <option value="influencer_instagram">Influencer - Instagram</option>
-                  <option value="influencer_facebook">Influencer - Facebook</option>
-                  <option value="influencer_twitter">Influencer - Twitter/X</option>
-                  <option value="indian_startup">Indian Startup</option>
-                  <option value="film_entertainment">Film/Entertainment</option>
-                  <option value="business_india">Business in India</option>
-                  <option value="ecommerce">E-commerce</option>
-                  <option value="consulting">Consulting</option>
-                  <option value="agency">Agency</option>
-                  <option value="other">Other</option>
-                </select>
+                  Add startup
+                </button>
               </div>
-
-              <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIntegrationForm({ ...integrationForm, showInLeaderboard: !integrationForm.showInLeaderboard })}>
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  border: '1px solid #666',
-                  borderRadius: '4px',
-                  backgroundColor: integrationForm.showInLeaderboard ? '#4f46e5' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {integrationForm.showInLeaderboard && <div style={{ width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '2px' }}></div>}
-                </div>
-                <span style={{ color: '#ccc', fontSize: '0.9rem' }}>Show in public leaderboard</span>
-              </div>
-
-              {selectedProvider === 'stripe' && (
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Stripe API key</label>
-                  <input
-                    type="text"
-                    placeholder="rk_live_..."
-                    value={integrationForm.apiKey}
-                    onChange={(e) => setIntegrationForm({ ...integrationForm, apiKey: e.target.value })}
-                    style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
-                  />
-                  <p style={{ margin: '5px 0 0 0', fontSize: '0.75rem', color: '#666' }}>Click here to create a read-only API key.</p>
-                </div>
-              )}
-
-              {selectedProvider === 'razorpay' && (
-                <>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Key ID</label>
-                    <input
-                      type="text"
-                      placeholder="rzp_live_..."
-                      value={integrationForm.apiKey}
-                      onChange={(e) => setIntegrationForm({ ...integrationForm, apiKey: e.target.value })}
-                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
-                    />
-                  </div>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Key Secret</label>
-                    <input
-                      type="password"
-                      placeholder="Secret..."
-                      value={integrationForm.apiSecret}
-                      onChange={(e) => setIntegrationForm({ ...integrationForm, apiSecret: e.target.value })}
-                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {selectedProvider === 'paypal' && (
-                <>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Client ID</label>
-                    <input
-                      type="text"
-                      placeholder="Client ID..."
-                      value={integrationForm.clientId}
-                      onChange={(e) => setIntegrationForm({ ...integrationForm, clientId: e.target.value })}
-                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
-                    />
-                  </div>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>Secret</label>
-                    <input
-                      type="password"
-                      placeholder="Secret..."
-                      value={integrationForm.apiSecret}
-                      onChange={(e) => setIntegrationForm({ ...integrationForm, apiSecret: e.target.value })}
-                      style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontFamily: 'monospace' }}
-                    />
-                  </div>
-                </>
-              )}
-
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px', color: '#ccc', fontSize: '0.9rem' }}>X handle (optional)</label>
-                <input
-                  type="text"
-                  placeholder="@username"
-                  value={integrationForm.twitterHandle}
-                  onChange={(e) => setIntegrationForm({ ...integrationForm, twitterHandle: e.target.value })}
-                  style={{ width: '100%', padding: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', borderRadius: '6px' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIntegrationForm({ ...integrationForm, isAnonymous: !integrationForm.isAnonymous })}>
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  border: '1px solid #666',
-                  borderRadius: '4px',
-                  backgroundColor: integrationForm.isAnonymous ? '#4f46e5' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {integrationForm.isAnonymous && <div style={{ width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '2px' }}></div>}
-                </div>
-                <span style={{ color: '#ccc', fontSize: '0.9rem' }}>Anonymous mode</span>
-                <Info size={16} color="#666" />
-              </div>
-
-              <button
-                onClick={handleAddStartupSubmit}
-                style={{ width: '100%', padding: '12px', background: '#fff', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
-              >
-                Add startup
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Ad Booking Modal */}
       <BookAdModal
@@ -1093,6 +1100,6 @@ export default function TrustMRRLeaderboard() {
           <p style={{ margin: 0 }}>© 2025 TrueRR. All rights reserved.</p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }

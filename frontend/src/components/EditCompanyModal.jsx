@@ -20,6 +20,10 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
     const [apiKey, setApiKey] = useState('');
     const [error, setError] = useState('');
 
+    // Dynamic Backend URL for images
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+    const backendUrl = apiBase.replace('/api', '');
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -137,9 +141,8 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
             }
 
             const token = localStorage.getItem('authToken');
-            const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
 
-            const res = await fetch(`${base}/revenue/companies/${company.id}/update/`, {
+            const res = await fetch(`${apiBase}/revenue/companies/${company.id}/update/`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -185,7 +188,6 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
 
         try {
             const token = localStorage.getItem('authToken');
-            const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
 
             // Construct body based on what we have. 
             // The backend handles mapping api_key to client_id for PayPal if needed, 
@@ -200,7 +202,7 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
                 client_secret: secret
             };
 
-            const res = await fetch(`${base}/revenue/companies/${company.id}/refresh/`, {
+            const res = await fetch(`${apiBase}/revenue/companies/${company.id}/refresh/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -237,9 +239,8 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
         setLoading(true);
         try {
             const token = localStorage.getItem('authToken');
-            const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
 
-            const res = await fetch(`${base}/revenue/companies/${company.id}/delete/`, {
+            const res = await fetch(`${apiBase}/revenue/companies/${company.id}/delete/`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -294,7 +295,7 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
                             overflow: 'hidden', border: '1px solid #333'
                         }}>
                             {logoPreview ? (
-                                <img src={logoPreview} alt="Logo preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img src={logoPreview.startsWith('http') || logoPreview.startsWith('blob:') ? logoPreview : `${backendUrl}${logoPreview}`} alt="Logo preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <span style={{ fontSize: '2rem' }}>🏢</span>
                             )}
@@ -325,7 +326,7 @@ const EditCompanyModal = ({ company, onClose, onUpdate, onDelete }) => {
                             overflow: 'hidden', border: '1px solid #333'
                         }}>
                             {founderPhotoPreview ? (
-                                <img src={founderPhotoPreview.startsWith('http') ? founderPhotoPreview : `http://localhost:8000${founderPhotoPreview}`} alt="Founder preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img src={founderPhotoPreview.startsWith('http') || founderPhotoPreview.startsWith('blob:') ? founderPhotoPreview : `${backendUrl}${founderPhotoPreview}`} alt="Founder preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <span style={{ fontSize: '2rem' }}>👤</span>
                             )}

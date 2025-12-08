@@ -9,13 +9,20 @@ export default function CompanyProfile() {
     const navigate = useNavigate();
     const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [refreshLoading, setRefreshLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [showEmbedModal, setShowEmbedModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [otherCompanies, setOtherCompanies] = useState([]);
     const [companyRank, setCompanyRank] = useState(null);
     const [currentUser, setCurrentUser] = useState(null); // Store the logged-in user's info
+
+    // Dynamic Backend URL for images
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+    const backendUrl = apiBase.replace('/api', '');
 
     useEffect(() => {
         fetchCompanyDetails();
@@ -283,7 +290,7 @@ export default function CompanyProfile() {
                     <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                         {company.logo ? (
                             <img
-                                src={company.logo.startsWith('http') ? company.logo : `http://localhost:8000${company.logo}`}
+                                src={company.logo.startsWith('http') ? company.logo : `${backendUrl}${company.logo}`}
                                 alt={company.name}
                                 style={{
                                     width: '80px',
@@ -354,7 +361,7 @@ export default function CompanyProfile() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             {company.founder_photo ? (
                                 <img
-                                    src={company.founder_photo.startsWith('http') ? company.founder_photo : `http://localhost:8000${company.founder_photo}`}
+                                    src={company.founder_photo.startsWith('http') ? company.founder_photo : `${backendUrl}${company.founder_photo}`}
                                     alt={company.founder}
                                     style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                                     onError={(e) => {
@@ -518,7 +525,7 @@ export default function CompanyProfile() {
                                     <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
                                         {c.logo ? (
                                             <img
-                                                src={c.logo.startsWith('http') ? c.logo : `http://localhost:8000${c.logo}`}
+                                                src={c.logo.startsWith('http') ? c.logo : `${backendUrl}${c.logo}`}
                                                 alt={c.name}
                                                 style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }}
                                                 onError={(e) => {

@@ -4,13 +4,16 @@ import { ExternalLink, Calendar, Plus } from 'lucide-react';
 export default function AdSlot({ slotId, status, adData, onBookClick, price }) {
     const isBooked = status === 'booked';
 
+    // Dynamic Backend URL for images
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
+    const backendUrl = apiBase.replace('/api', '');
+
     const handleAdClick = async (e) => {
         if (!isBooked || !adData) return;
 
         // Track click
-        const base = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api';
         try {
-            await fetch(`${base}/revenue/ads/${adData.id}/click/`, { method: 'POST' });
+            await fetch(`${apiBase}/revenue/ads/${adData.id}/click/`, { method: 'POST' });
             console.log('Ad click tracked');
         } catch (err) {
             console.error('Failed to track click:', err);
@@ -41,7 +44,7 @@ export default function AdSlot({ slotId, status, adData, onBookClick, price }) {
                     <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
                         {adData.image ? (
                             <img
-                                src={adData.image.startsWith('http') ? adData.image : `http://localhost:8000${adData.image}`}
+                                src={adData.image.startsWith('http') ? adData.image : `${backendUrl}${adData.image}`}
                                 alt={adData.title}
                                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                             />
