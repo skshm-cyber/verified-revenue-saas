@@ -1,0 +1,23 @@
+{
+  "phases": {
+    "setup": {
+      "nixPkgs": ["python39", "postgresql"]
+    },
+    "install": {
+      "cmds": [
+        "cd backend",
+        "pip install -r requirements.txt"
+      ]
+    },
+    "build": {
+      "cmds": [
+        "cd backend",
+        "python manage.py collectstatic --noinput",
+        "python manage.py migrate --noinput"
+      ]
+    }
+  },
+  "start": {
+    "cmd": "cd backend && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT"
+  }
+}
