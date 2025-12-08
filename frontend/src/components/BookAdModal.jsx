@@ -218,7 +218,7 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
                             <label style={{ color: '#ccc', fontSize: '0.9rem', fontWeight: '600' }}>
                                 Start Date
                             </label>
-                            {nextAvailableDate && (
+                            {nextAvailableDate && nextAvailableDate !== new Date().toISOString().split('T')[0] && (
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, customStartDate: nextAvailableDate })}
@@ -237,32 +237,35 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
                             )}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, customStartDate: null })}
-                                style={{
-                                    padding: '12px',
-                                    background: !formData.customStartDate ? '#4f46e5' : '#1a1a1a',
-                                    border: `1px solid ${!formData.customStartDate ? '#4f46e5' : '#333'}`,
-                                    borderRadius: '6px',
-                                    color: '#fff',
-                                    cursor: 'pointer',
-                                    fontSize: '0.85rem'
-                                }}
-                            >
-                                <div style={{ fontWeight: '600', marginBottom: '4px' }}>Start Today</div>
-                                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
-                                    {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </div>
-                            </button>
+                        <div style={{ display: 'grid', gridTemplateColumns: nextAvailableDate === new Date().toISOString().split('T')[0] || !nextAvailableDate ? '1fr 1fr' : '1fr', gap: '12px' }}>
+                            {/* Only show Start Today if slot is available today */}
+                            {(nextAvailableDate === new Date().toISOString().split('T')[0] || !nextAvailableDate) && (
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, customStartDate: null })}
+                                    style={{
+                                        padding: '12px',
+                                        background: !formData.customStartDate ? '#4f46e5' : '#1a1a1a',
+                                        border: `1px solid ${!formData.customStartDate ? '#4f46e5' : '#333'}`,
+                                        borderRadius: '6px',
+                                        color: '#fff',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>Start Today</div>
+                                    <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                                        {new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </div>
+                                </button>
+                            )}
 
                             <div>
                                 <input
                                     type="date"
-                                    value={formData.customStartDate || ''}
+                                    value={formData.customStartDate || nextAvailableDate || ''}
                                     onChange={(e) => setFormData({ ...formData, customStartDate: e.target.value })}
-                                    min={new Date().toISOString().split('T')[0]}
+                                    min={nextAvailableDate || new Date().toISOString().split('T')[0]}
                                     style={{
                                         width: '100%',
                                         padding: '12px',
@@ -274,14 +277,25 @@ export default function BookAdModal({ isOpen, onClose, slotId, onBook }) {
                                     }}
                                 />
                                 <div style={{ fontSize: '0.7rem', color: '#666', marginTop: '4px' }}>
-                                    {formData.customStartDate ? 'Custom date selected' : 'Select future date'}
+                                    {nextAvailableDate && nextAvailableDate !== new Date().toISOString().split('T')[0]
+                                        ? `Slot available from ${new Date(nextAvailableDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`
+                                        : 'Select future date'
+                                    }
                                 </div>
                             </div>
                         </div>
 
-                        {nextAvailableDate && (
-                            <div style={{ marginTop: '12px', padding: '10px', background: '#111', borderRadius: '6px', fontSize: '0.8rem', color: '#10b981' }}>
-                                ✓ Next available: {new Date(nextAvailableDate).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        {nextAvailableDate && nextAvailableDate !== new Date().toISOString().split('T')[0] && (
+                            <div style={{ marginTop: '12px', padding: '10px', background: '#111', borderRadius: '6px', fontSize: '0.8rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>⚠️</span>
+                                <span>This slot is currently booked. Next available: {new Date(nextAvailableDate).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                            </div>
+                        )}
+
+                        {nextAvailableDate && nextAvailableDate === new Date().toISOString().split('T')[0] && (
+                            <div style={{ marginTop: '12px', padding: '10px', background: '#111', borderRadius: '6px', fontSize: '0.8rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>✓</span>
+                                <span>This slot is available now! Your ad can go live immediately.</span>
                             </div>
                         )}
                     </div>
