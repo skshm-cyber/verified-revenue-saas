@@ -396,7 +396,16 @@ export default function TrustMRRLeaderboard() {
             <span>TrustMRR</span>
           </div>
           {isLoggedIn ? (
-            <button onClick={handleLogout} className="login-btn">Logout</button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => window.location.href = '/my-ads'}
+                className="login-btn"
+                style={{ background: '#4f46e5' }}
+              >
+                My Ads
+              </button>
+              <button onClick={handleLogout} className="login-btn">Logout</button>
+            </div>
           ) : (
             <button onClick={() => setShowAuthModal(true)} className="login-btn">Login</button>
           )}
